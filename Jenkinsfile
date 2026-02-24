@@ -1,7 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKERHUB_USERNAME = 'dhivyadev'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-credentials'
+    }
+
+    triggers {
+        githubPush()
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Checking out code...'
@@ -9,9 +19,9 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('API Build') {
             steps {
-                echo 'Building all services...'
+                echo 'Building all backend services...'
                 sh '''
                     export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
                     ./mvnw clean package -DskipTests
@@ -19,27 +29,75 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('UI Build') {
             steps {
-                echo 'Building Docker images...'
-                sh 'docker-compose build'
+                echo 'Building Angular frontend...'
+                sh '''
+                    cd frontend
+                    npm ci --legacy-peer-deps
+                    npx ng build --configuration=production
+                '''
             }
         }
 
-        
-    stage('Push to DockerHub') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin && docker-compose push && docker logout'
+        stage('Docker Build - API') {
+            steps {
+                echo 'Building backend Docker images...'
+                sh '''
+                    docker-compose build config-server eureka-server api-gateway \
+                        auth-service customer-service account-service \
+                        document-service notification-service
+                '''
             }
         }
-    }
-    stage('Deploy') {
+
+        stage('Docker Build - UI') {
+            steps {
+                echo 'Building frontend Docker image...'
+                sh 'docker-compose build frontend'
+            }
+        }
+
+        stage('Push API Images') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker-compose push config-server eureka-server api-gateway \
+                            auth-service customer-service account-service \
+                            document-service notification-service
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('Push UI Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker-compose push frontend
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 echo 'Deploying services...'
                 sh '''
-                    docker-compose stop $(docker-compose config --services | grep -v jenkins) || true
-                    docker-compose rm -f $(docker-compose config --services | grep -v jenkins) || true
+                    docker-compose stop $(docker-compose config --services | grep -v jenkins)
+                    docker-compose rm -f $(docker-compose config --services | grep -v jenkins)
                     docker-compose up -d $(docker-compose config --services | grep -v jenkins)
                 '''
             }
