@@ -1,0 +1,185 @@
+<div class="documents-container">
+  <mat-toolbar color="primary" class="toolbar">
+    <button mat-icon-button routerLink="/dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <img src="logo.svg" alt="logo" class="toolbar-logo">
+    <span class="brand">SecureBank</span>
+    <span class="spacer"></span>
+    <button mat-icon-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <h2>KYC Documents</h2>
+        <p>Upload your identity documents for verification</p>
+      </div>
+      <button mat-raised-button color="primary"
+              (click)="showUploadForm = !showUploadForm">
+        <mat-icon>upload</mat-icon> Upload Document
+      </button>
+    </div>
+
+    <div class="success-msg" *ngIf="successMessage">{{successMessage}}</div>
+    <div class="error-msg" *ngIf="errorMessage">{{errorMessage}}</div>
+
+    <!-- Upload Form -->
+    <mat-card class="upload-form" *ngIf="showUploadForm">
+      <mat-card-header>
+        <mat-card-title>Upload New Document</mat-card-title>
+        <mat-card-subtitle>Supported formats: JPG, PNG, PDF (max 5MB)</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="uploadForm" (ngSubmit)="uploadDocument()">
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Document Type</mat-label>
+              <mat-select formControlName="documentType"
+                          (selectionChange)="onDocumentTypeChange($event.value)">
+                <mat-option *ngFor="let type of documentTypes"
+                            [value]="type.value">
+                  {{type.label}}
+                </mat-option>
+              </mat-select>
+              <mat-error>Document type is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Document Number</mat-label>
+              <input matInput formControlName="documentNumber"
+                     [placeholder]="currentPlaceholder">
+              <mat-hint>{{currentHint}}</mat-hint>
+              <mat-error *ngIf="uploadForm.get('documentNumber')?.hasError('required')">
+                Document number is required
+              </mat-error>
+              <mat-error *ngIf="uploadForm.get('documentNumber')?.hasError('pattern')">
+                Invalid format — {{currentHint}}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Expiry Date (Optional)</mat-label>
+              <input matInput type="date" formControlName="expiryDate">
+            </mat-form-field>
+          </div>
+
+          <!-- File Upload -->
+          <div class="file-upload-section">
+            <div class="file-drop-zone" (click)="fileInput.click()"
+                 [class.has-file]="selectedFile">
+              <input #fileInput type="file"
+                     (change)="onFileSelected($event)"
+                     accept=".jpg,.jpeg,.png,.pdf"
+                     style="display:none">
+              <mat-icon>{{selectedFile ? 'check_circle' : 'cloud_upload'}}</mat-icon>
+              <p *ngIf="!selectedFile">Click to browse or drag and drop</p>
+              <p *ngIf="selectedFile" class="file-name">{{selectedFileName}}</p>
+              <span *ngIf="!selectedFile">JPG, PNG, PDF up to 5MB</span>
+              <span *ngIf="selectedFile" class="file-size">
+                {{formatFileSize(selectedFile.size)}}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button"
+                    (click)="showUploadForm = false; selectedFile = null; selectedFileName = ''">
+              Cancel
+            </button>
+            <button mat-raised-button color="primary"
+                    type="submit"
+                    [disabled]="isSubmitting || !selectedFile || uploadForm.invalid">
+              <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+              <span *ngIf="!isSubmitting">Upload Document</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading documents...</p>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="documents-grid" *ngIf="!isLoading && documents.length > 0">
+      <mat-card class="document-card" *ngFor="let doc of documents">
+        <mat-card-content>
+          <div class="doc-header">
+            <div class="doc-icon">
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="doc-info">
+              <h3>{{getDocumentLabel(doc.documentType)}}</h3>
+              <p>{{doc.documentNumber}}</p>
+            </div>
+            <span class="status-badge" [class]="getStatusColor(doc.documentStatus)">
+              {{doc.documentStatus}}
+            </span>
+          </div>
+
+          <div class="doc-details">
+            <div class="detail-item">
+              <mat-icon>insert_drive_file</mat-icon>
+              <span>{{doc.fileName}}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>storage</mat-icon>
+              <span>{{formatFileSize(doc.fileSize)}}</span>
+            </div>
+            <div class="detail-item" *ngIf="doc.expiryDate">
+              <mat-icon>event</mat-icon>
+              <span>Expires: {{doc.expiryDate | date:'dd/MM/yyyy'}}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>schedule</mat-icon>
+              <span>Uploaded: {{doc.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
+            </div>
+            <div class="detail-item" *ngIf="doc.rejectionReason">
+              <mat-icon>notes</mat-icon>
+              <span>Reason: {{doc.rejectionReason}}</span>
+            </div>
+          </div>
+
+          <div class="doc-actions">
+           
+            <div class="verified-badge" *ngIf="doc.documentStatus === 'VERIFIED'">
+              <mat-icon>verified</mat-icon> Verified on {{doc.verifiedAt | date:'dd/MM/yyyy'}}
+            </div>
+            <div class="rejected-badge" *ngIf="doc.documentStatus === 'REJECTED'">
+              <mat-icon>cancel</mat-icon> {{doc.rejectionReason || 'Document invalid'}}
+            </div>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- No Documents -->
+    <mat-card class="no-documents" *ngIf="!isLoading && documents.length === 0">
+      <mat-card-content>
+        <mat-icon>folder_open</mat-icon>
+        <h3>No documents uploaded yet</h3>
+        <p>Upload your KYC documents to complete verification</p>
+        <div class="required-docs">
+          <h4>Required Documents:</h4>
+          <ul>
+            <li>Aadhaar Card or Passport (Identity Proof)</li>
+            <li>PAN Card (Tax ID)</li>
+            <li>Utility Bill (Address Proof)</li>
+          </ul>
+        </div>
+        <button mat-raised-button color="primary"
+                (click)="showUploadForm = true">
+          Upload Now
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

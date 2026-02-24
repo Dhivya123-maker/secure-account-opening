@@ -1,0 +1,222 @@
+.accounts-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+    .toolbar-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin-right: 4px;
+      border: 2px solid white;
+    }
+
+    .brand { margin-left: 8px; font-size: 20px; font-weight: 700; }
+    .spacer { flex: 1; }
+  }
+
+  .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      h2 { font-size: 24px; font-weight: 600; color: #1a237e; }
+    }
+
+    .success-msg {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .error-msg {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .create-form {
+      margin-bottom: 24px;
+      border-radius: 12px;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      gap: 16px;
+      p { color: #666; }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      mat-form-field { width: 100%; }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .no-accounts-msg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      gap: 16px;
+      mat-icon { font-size: 60px; width: 60px; height: 60px; color: #ccc; }
+      p { color: #666; font-size: 16px; }
+    }
+
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+
+      .account-card {
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1a237e, #3949ab);
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        &.selected { border: 3px solid #ffeb3b; }
+
+        mat-card-content {
+          padding: 20px;
+
+          .account-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            opacity: 0.9;
+          }
+
+          .account-number { font-size: 13px; opacity: 0.8; margin-bottom: 8px; }
+          .balance { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+
+          .account-footer {
+            display: flex;
+            justify-content: space-between;
+
+            .status {
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              background: rgba(255,255,255,0.2);
+              &.active { background: rgba(76,175,80,0.4); }
+            }
+
+            .interest { font-size: 12px; opacity: 0.8; }
+          }
+        }
+      }
+    }
+
+    .transaction-section {
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        h3 { font-size: 20px; font-weight: 600; color: #1a237e; }
+
+        .action-buttons {
+          display: flex;
+          gap: 8px;
+        }
+      }
+
+      .transaction-form {
+        margin-bottom: 16px;
+        border-radius: 12px;
+      }
+
+      .date-filter {
+        margin-bottom: 16px;
+        border-radius: 12px;
+
+        .filter-row {
+          display: flex;
+          align-items: flex-end;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .date-field {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+          }
+
+          .date-input {
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+            width: 180px;
+            height: 42px;
+
+            &:focus {
+              border-color: #1a237e;
+              box-shadow: 0 0 0 2px rgba(26,35,126,0.1);
+            }
+          }
+        }
+      }
+
+      .transactions-table {
+        border-radius: 12px;
+        overflow: hidden;
+
+        table { width: 100%; }
+
+        .credit { color: #2e7d32; font-weight: 500; }
+        .debit { color: #c62828; font-weight: 500; }
+
+        .no-transactions {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 40px;
+          gap: 16px;
+          mat-icon { font-size: 60px; width: 60px; height: 60px; color: #ccc; }
+          p { color: #666; }
+        }
+      }
+    }
+  }
+}

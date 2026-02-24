@@ -1,0 +1,199 @@
+services:
+
+  # Oracle Database
+  oracle-db:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: securebank-oracle
+    environment:
+      ORACLE_PWD: SecureBank#123
+    ports:
+      - "1522:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - securebank-network
+
+
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: securebank-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - securebank-network
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: securebank-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - securebank-network
+
+  # Config Server
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: securebank-config-server
+    ports:
+      - "8071:8071"
+    networks:
+      - securebank-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8071/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  # Eureka Server
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    container_name: securebank-eureka
+    ports:
+      - "8070:8070"
+    depends_on:
+      config-server:
+        condition: service_healthy
+    networks:
+      - securebank-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8070/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: securebank-auth
+    ports:
+      - "8080:8080"
+    depends_on:
+      oracle-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - securebank-network
+
+  # Customer Service
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: securebank-customer
+    ports:
+      - "8081:8081"
+    depends_on:
+      oracle-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - securebank-network
+
+  # Account Service
+  account-service:
+    build:
+      context: .
+      dockerfile: account-service/Dockerfile
+    container_name: securebank-account
+    ports:
+      - "8082:8082"
+    depends_on:
+      oracle-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - securebank-network
+
+  # Document Service
+  document-service:
+    build:
+      context: .
+      dockerfile: document-service/Dockerfile
+    container_name: securebank-document
+    ports:
+      - "8083:8083"
+    depends_on:
+      oracle-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    volumes:
+      - document-storage:/tmp/securebank/documents
+    networks:
+      - securebank-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: securebank-notification
+    ports:
+      - "8084:8084"
+    depends_on:
+      oracle-db:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - securebank-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: securebank-gateway
+    ports:
+      - "8085:8085"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - securebank-network
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: securebank-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - securebank-network
+
+networks:
+  securebank-network:
+    driver: bridge
+
+volumes:
+  oracle-data:
+  document-storage:
