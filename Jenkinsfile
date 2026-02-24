@@ -22,14 +22,14 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo 'Building Docker images...'
-                sh 'docker compose build'
+                sh 'docker-compose build'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying services...'
-                sh 'docker compose up -d'
+                sh 'docker-compose up -d'
             }
         }
     }
