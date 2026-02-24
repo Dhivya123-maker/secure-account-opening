@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        JAVA_HOME = '/opt/homebrew/opt/openjdk@21'
-        PATH = "${JAVA_HOME}/bin:${PATH}"
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +12,10 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building all services...'
-                sh './mvnw clean package -DskipTests'
+                sh '''
+                    export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+                    ./mvnw clean package -DskipTests
+                '''
             }
         }
 

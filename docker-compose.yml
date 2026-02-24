@@ -190,10 +190,26 @@ services:
     networks:
       - securebank-network
 
+
+  # Jenkins
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: securebank-jenkins
+    ports:
+      - "8090:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - securebank-network
+    restart: unless-stopped
+
 networks:
   securebank-network:
     driver: bridge
 
 volumes:
   oracle-data:
+  jenkins-data:
   document-storage:
