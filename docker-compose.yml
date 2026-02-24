@@ -8,217 +8,37 @@ services:
       ORACLE_PWD: SecureBank#123
     ports:
       - "1522:1521"
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: securebank-prometheus
+    ports:
+      - "9090:9090"
     volumes:
-      - oracle-data:/opt/oracle/oradata
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - securebank-network
+      - securebank-pipeline_securebank-network
 
-
-  # Zookeeper
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: securebank-zookeeper
+  grafana:
+    image: grafana/grafana:latest
+    container_name: securebank-grafana
+    ports:
+      - "3000:3000"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - securebank-network
-
-  # Kafka
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: securebank-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - securebank-network
-
-  # Config Server
-  config-server:
-    image: dhivyadev/securebank-pipeline-config-server:latest
-    build:
-      context: .
-      dockerfile: config-server/Dockerfile
-    container_name: securebank-config-server
-    ports:
-      - "8071:8071"
-    networks:
-      - securebank-network
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8071/actuator/health"]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-
-  # Eureka Server
-  eureka-server:
-    image: dhivyadev/securebank-pipeline-eureka-server:latest
-    build:
-      context: .
-      dockerfile: eureka-server/Dockerfile
-    container_name: securebank-eureka
-    ports:
-      - "8070:8070"
-    depends_on:
-      config-server:
-        condition: service_healthy
-    networks:
-      - securebank-network
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8070/actuator/health"]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-
-  # Auth Service
-  auth-service:
-    image: dhivyadev/securebank-pipeline-auth-service:latest
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
-    container_name: securebank-auth
-    ports:
-      - "8080:8080"
-    depends_on:
-      oracle-db:
-        condition: service_started
-      eureka-server:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-    networks:
-      - securebank-network
-
-  # Customer Service
-  customer-service:
-    image: dhivyadev/securebank-pipeline-customer-service:latest
-    build:
-      context: .
-      dockerfile: customer-service/Dockerfile
-    container_name: securebank-customer
-    ports:
-      - "8081:8081"
-    depends_on:
-      oracle-db:
-        condition: service_started
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - securebank-network
-
-  # Account Service
-  account-service:
-    image: dhivyadev/securebank-pipeline-account-service:latest
-    build:
-      context: .
-      dockerfile: account-service/Dockerfile
-    container_name: securebank-account
-    ports:
-      - "8082:8082"
-    depends_on:
-      oracle-db:
-        condition: service_started
-      eureka-server:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-    networks:
-      - securebank-network
-
-  # Document Service
-  document-service:
-    image: dhivyadev/securebank-pipeline-document-service:latest
-    build:
-      context: .
-      dockerfile: document-service/Dockerfile
-    container_name: securebank-document
-    ports:
-      - "8083:8083"
-    depends_on:
-      oracle-db:
-        condition: service_started
-      eureka-server:
-        condition: service_healthy
-      kafka:
-        condition: service_started
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
     volumes:
-      - document-storage:/tmp/securebank/documents
-    networks:
-      - securebank-network
-
-  # Notification Service
-  notification-service:
-    image: dhivyadev/securebank-pipeline-notification-service:latest
-    build:
-      context: .
-      dockerfile: notification-service/Dockerfile
-    container_name: securebank-notification
-    ports:
-      - "8084:8084"
+      - grafana_data:/var/lib/grafana
     depends_on:
-      oracle-db:
-        condition: service_started
-      eureka-server:
-        condition: service_healthy
-      kafka:
-        condition: service_started
+      - prometheus
     networks:
-      - securebank-network
-
-  # API Gateway
-  api-gateway:
-    image: dhivyadev/securebank-pipeline-api-gateway:latest
-    build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
-    container_name: securebank-gateway
-    ports:
-      - "8085:8085"
-    depends_on:
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - securebank-network
-
-  # Frontend
-  frontend:
-    image: dhivyadev/securebank-pipeline-frontend:latest
-    build: ./frontend
-    container_name: securebank-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - api-gateway
-    networks:
-      - securebank-network
-
-
-  # Jenkins
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: securebank-jenkins
-    ports:
-      - "8090:8080"
-      - "50000:50000"
-    volumes:
-      - jenkins-data:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - securebank-network
-    restart: unless-stopped
+      - securebank-pipeline_securebank-network
 
 networks:
-  securebank-network:
-    driver: bridge
+  securebank-pipeline_securebank-network:
+    external: true
 
 volumes:
   oracle-data:
   jenkins-data:
   document-storage:
+  grafana_data:
