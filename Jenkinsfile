@@ -29,7 +29,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying services...'
-                sh 'docker-compose up -d'
+                sh '''
+                    docker-compose down || true
+                    docker-compose up -d
+                '''
             }
         }
     }
