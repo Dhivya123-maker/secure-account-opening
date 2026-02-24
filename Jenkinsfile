@@ -26,7 +26,15 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        
+    stage('Push to DockerHub') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin && docker-compose push && docker logout'
+            }
+        }
+    }
+    stage('Deploy') {
             steps {
                 echo 'Deploying services...'
                 sh '''
