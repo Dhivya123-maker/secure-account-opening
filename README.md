@@ -1,43 +1,6 @@
 🏦 Secure Account Opening Application — Full Project Roadmap
 Stack: Spring Boot 3 · Angular 17 · Oracle · Kafka · RabbitMQ · Eureka · Spring Cloud · API Gateway · Docker · Helm · AWS · CI/CD · Grafana · GitHub
 
-📐 System Architecture Overview
-                          ┌─────────────────────────────────────────────┐
-                          │              Angular 17 Frontend             │
-                          │         (Account Opening UI / Portal)        │
-                          └─────────────────┬───────────────────────────┘
-                                            │ HTTPS
-                          ┌─────────────────▼───────────────────────────┐
-                          │          Spring Cloud API Gateway            │
-                          │   (Auth Filter · Rate Limiting · Routing)    │
-                          └──┬──────────┬──────────┬──────────┬─────────┘
-                             │          │          │          │
-               ┌─────────────▼──┐  ┌───▼──────┐  ┌▼──────────────┐  ┌▼──────────────┐
-               │  Auth Service  │  │ Customer │  │Account Service│  │  Document Svc │
-               │  (JWT/OAuth2)  │  │ Service  │  │               │  │  (KYC/Upload) │
-               └────────────────┘  └──────────┘  └───────────────┘  └───────────────┘
-                                        │                │
-                          ┌─────────────▼────────────────▼─────────────┐
-                          │               Oracle Database               │
-                          │         (PL/SQL Stored Procedures)          │
-                          └─────────────────────────────────────────────┘
-                                            │
-               ┌────────────────────────────▼────────────────────────────┐
-               │                  Messaging Layer                         │
-               │         Kafka Streams (events)  ·  RabbitMQ (tasks)     │
-               └──────────────────────┬──────────────────────────────────┘
-                                      │
-                          ┌───────────▼───────────┐
-                          │  Notification Service  │
-                          │  (Email · SMS · Push)  │
-                          └───────────────────────┘
-
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                       Infrastructure Layer                              │
-  │  Eureka (Discovery) · Config Server · Zipkin (Tracing) · Prometheus    │
-  │  Grafana (Monitoring) · Docker · Helm · Kubernetes · AWS EKS/RDS/MSK   │
-  └─────────────────────────────────────────────────────────────────────────┘
-
 📦 Microservices Breakdown
 Service	Port	Responsibility	DB
 config-server	8071	Centralized config via GitHub	—
@@ -179,51 +142,6 @@ Deliverables:
 * Centralized logging with AWS CloudWatch
 * Alerting rules (PagerDuty/Slack webhook)
 
-📁 Project Directory Structure
-secure-account-opening/
-├── pom.xml                          # Parent Maven POM
-├── config-server/
-├── eureka-server/
-├── api-gateway/
-├── auth-service/
-├── customer-service/
-├── account-service/
-├── document-service/
-├── notification-service/
-├── frontend/                        # Angular 17 app
-├── config-repo/                     # GitHub config repo (separate)
-│   ├── application.yml
-│   ├── auth-service.yml
-│   ├── customer-service.yml
-│   ├── account-service.yml
-│   ├── document-service.yml
-│   └── notification-service.yml
-├── docker/
-│   └── docker-compose.yml
-├── helm/
-│   ├── config-server/
-│   ├── eureka-server/
-│   ├── api-gateway/
-│   ├── auth-service/
-│   ├── customer-service/
-│   ├── account-service/
-│   ├── document-service/
-│   └── notification-service/
-├── terraform/
-│   ├── eks/
-│   ├── rds/
-│   ├── msk/
-│   └── s3/
-├── .github/
-│   └── workflows/
-│       ├── build.yml
-│       ├── deploy-staging.yml
-│       └── deploy-prod.yml
-└── monitoring/
-    ├── prometheus/
-    │   └── prometheus.yml
-    └── grafana/
-        └── dashboards/
 
 🛠️ Technology Version Matrix
 Technology	Version
