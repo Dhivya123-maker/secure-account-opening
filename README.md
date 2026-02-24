@@ -221,3 +221,4 @@ Security layers:
 * [ ] Phase 8 — Angular Frontend
 * [ ] Phase 9 — Docker + Helm + AWS
 * [ ] Phase 10 — CI/CD + Grafana
+# CI/CD Test
