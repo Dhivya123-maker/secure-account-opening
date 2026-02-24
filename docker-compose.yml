@@ -42,6 +42,7 @@ services:
 
   # Config Server
   config-server:
+    image: dhivyadev/securebank-pipeline-config-server:latest
     build:
       context: .
       dockerfile: config-server/Dockerfile
@@ -58,6 +59,7 @@ services:
 
   # Eureka Server
   eureka-server:
+    image: dhivyadev/securebank-pipeline-eureka-server:latest
     build:
       context: .
       dockerfile: eureka-server/Dockerfile
@@ -77,6 +79,7 @@ services:
 
   # Auth Service
   auth-service:
+    image: dhivyadev/securebank-pipeline-auth-service:latest
     build:
       context: .
       dockerfile: auth-service/Dockerfile
@@ -95,6 +98,7 @@ services:
 
   # Customer Service
   customer-service:
+    image: dhivyadev/securebank-pipeline-customer-service:latest
     build:
       context: .
       dockerfile: customer-service/Dockerfile
@@ -111,6 +115,7 @@ services:
 
   # Account Service
   account-service:
+    image: dhivyadev/securebank-pipeline-account-service:latest
     build:
       context: .
       dockerfile: account-service/Dockerfile
@@ -129,6 +134,7 @@ services:
 
   # Document Service
   document-service:
+    image: dhivyadev/securebank-pipeline-document-service:latest
     build:
       context: .
       dockerfile: document-service/Dockerfile
@@ -149,6 +155,7 @@ services:
 
   # Notification Service
   notification-service:
+    image: dhivyadev/securebank-pipeline-notification-service:latest
     build:
       context: .
       dockerfile: notification-service/Dockerfile
@@ -167,6 +174,7 @@ services:
 
   # API Gateway
   api-gateway:
+    image: dhivyadev/securebank-pipeline-api-gateway:latest
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
@@ -181,6 +189,7 @@ services:
 
   # Frontend
   frontend:
+    image: dhivyadev/securebank-pipeline-frontend:latest
     build: ./frontend
     container_name: securebank-frontend
     ports:
