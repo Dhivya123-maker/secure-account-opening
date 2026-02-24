@@ -30,8 +30,9 @@ pipeline {
             steps {
                 echo 'Deploying services...'
                 sh '''
-                    docker-compose down || true
-                    docker-compose up -d
+                    docker-compose stop $(docker-compose config --services | grep -v jenkins) || true
+                    docker-compose rm -f $(docker-compose config --services | grep -v jenkins) || true
+                    docker-compose up -d $(docker-compose config --services | grep -v jenkins)
                 '''
             }
         }
