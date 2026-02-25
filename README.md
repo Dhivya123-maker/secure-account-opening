@@ -111,19 +111,12 @@ Deliverables:
 * Real-time status updates (SSE/WebSocket)
 Key Dependencies: @angular/forms, @angular/router, rxjs, tailwindcss
 
-✅ PHASE 9 — Docker + Helm + Kubernetes + AWS
-Goal: Full containerization and cloud deployment on AWS EKS.
+✅ PHASE 9 — Docker + Helm + Kubernetes
+Goal: Full containerization.
 Deliverables:
 * Dockerfile per service (multi-stage builds)
 * docker-compose.yml for local full-stack run
 * Helm charts per service (values.yaml, deployment.yaml, service.yaml, ingress.yaml)
-* AWS EKS cluster setup (Terraform scripts)
-* AWS RDS Oracle provisioning
-* AWS MSK (Managed Kafka) setup
-* AWS S3 bucket config
-* Kubernetes Secrets + ConfigMaps
-* Horizontal Pod Autoscaler (HPA)
-* Ingress with AWS ALB Controller
 
 ✅ PHASE 10 — CI/CD + Monitoring + Observability
 Goal: Automated pipelines, full observability with Grafana dashboards.
