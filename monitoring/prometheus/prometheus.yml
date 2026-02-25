@@ -5,39 +5,39 @@ scrape_configs:
   - job_name: 'config-server'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-config-server:8071']
+      - targets: ['192.168.1.7:8071']
 
   - job_name: 'eureka-server'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-eureka:8070']
+      - targets: ['192.168.1.7:8070']
 
   - job_name: 'api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-gateway:8085']
+      - targets: ['192.168.1.7:8085']
 
   - job_name: 'auth-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-auth:8080']
+      - targets: ['192.168.1.7:8080']
 
   - job_name: 'customer-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-customer:8081']
+      - targets: ['192.168.1.7:8081']
 
   - job_name: 'account-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-account:8082']
+      - targets: ['192.168.1.7:8082']
 
   - job_name: 'document-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-document:8083']
+      - targets: ['192.168.1.7:8083']
 
   - job_name: 'notification-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['securebank-notification:8084']
+      - targets: ['192.168.1.7:8084']
