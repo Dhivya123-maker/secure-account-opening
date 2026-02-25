@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-service
+  namespace: securebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-service
+  template:
+    metadata:
+      labels:
+        app: customer-service
+    spec:
+      containers:
+      - name: customer-service
+        image: dhivyadev/securebank-pipeline-customer-service:latest
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "600Mi"
+            cpu: "300m"
+        envFrom:
+        - configMapRef:
+            name: securebank-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+  namespace: securebank
+spec:
+  selector:
+    app: customer-service
+  ports:
+  - port: 8081
+    targetPort: 8081

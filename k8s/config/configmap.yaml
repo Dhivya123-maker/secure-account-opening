@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: securebank-config
+  namespace: securebank
+data:
+  EUREKA_SERVER: "http://eureka-server:8070/eureka/"
+  CONFIG_SERVER: "http://config-server:8071"
+  ORACLE_HOST: "192.168.1.7"
+  ORACLE_PORT: "1522"
+  KAFKA_BOOTSTRAP: "192.168.1.7:9092"
+  SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@192.168.1.7:1522/FREE"
+  SPRING_DATASOURCE_USERNAME: "system"
+  SPRING_DATASOURCE_PASSWORD: "SecureBank#123"

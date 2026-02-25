@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-db
+  namespace: securebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-db
+  template:
+    metadata:
+      labels:
+        app: oracle-db
+    spec:
+      containers:
+      - name: oracle-db
+        image: container-registry.oracle.com/database/free:latest
+        env:
+        - name: ORACLE_PWD
+          valueFrom:
+            secretKeyRef:
+              name: securebank-secrets
+              key: oracle-password
+        ports:
+        - containerPort: 1521
+        volumeMounts:
+        - name: oracle-data
+          mountPath: /opt/oracle/oradata
+      volumes:
+      - name: oracle-data
+        persistentVolumeClaim:
+          claimName: oracle-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: oracle-pvc
+  namespace: securebank
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-db
+  namespace: securebank
+spec:
+  selector:
+    app: oracle-db
+  ports:
+  - port: 1521
+    targetPort: 1521

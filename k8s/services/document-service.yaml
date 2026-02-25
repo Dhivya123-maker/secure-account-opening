@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-service
+  namespace: securebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-service
+  template:
+    metadata:
+      labels:
+        app: document-service
+    spec:
+      containers:
+      - name: document-service
+        image: dhivyadev/securebank-pipeline-document-service:latest
+        ports:
+        - containerPort: 8083
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "400Mi"
+            cpu: "300m"
+        envFrom:
+        - configMapRef:
+            name: securebank-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-service
+  namespace: securebank
+spec:
+  selector:
+    app: document-service
+  ports:
+  - port: 8083
+    targetPort: 8083

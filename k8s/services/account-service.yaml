@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service
+  namespace: securebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+  template:
+    metadata:
+      labels:
+        app: account-service
+    spec:
+      containers:
+      - name: account-service
+        image: dhivyadev/securebank-pipeline-account-service:latest
+        ports:
+        - containerPort: 8082
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "400Mi"
+            cpu: "300m"
+        envFrom:
+        - configMapRef:
+            name: securebank-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+  namespace: securebank
+spec:
+  selector:
+    app: account-service
+  ports:
+  - port: 8082
+    targetPort: 8082

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eureka-server
+  namespace: securebank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eureka-server
+  template:
+    metadata:
+      labels:
+        app: eureka-server
+    spec:
+      containers:
+      - name: eureka-server
+        image: dhivyadev/securebank-pipeline-eureka-server:latest
+        ports:
+        - containerPort: 8070
+        env:
+        - name: JAVA_OPTS
+          value: "-Xms64m -Xmx128m"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server:8071"
+        resources:
+          requests:
+            memory: "150Mi"
+            cpu: "50m"
+          limits:
+            memory: "250Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-server
+  namespace: securebank
+spec:
+  selector:
+    app: eureka-server
+  ports:
+  - port: 8070
+    targetPort: 8070
