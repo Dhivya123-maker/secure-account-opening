@@ -96,8 +96,8 @@ pipeline {
             steps {
                 echo 'Deploying services...'
                 sh '''
-                    docker ps -aq --filter name=securebank | xargs -r docker rm -f
-                    docker-compose up -d
+                    docker ps -aq --filter name=securebank | grep -v $(docker inspect --format="{{.Id}}" securebank-jenkins 2>/dev/null || echo NONE) | xargs -r docker rm -f
+                    docker-compose up -d zookeeper kafka oracle-db config-server eureka-server api-gateway auth-service customer-service account-service document-service notification-service frontend
                 '''
             }
         }
