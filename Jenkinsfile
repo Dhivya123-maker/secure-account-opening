@@ -15,6 +15,7 @@ pipeline {
         stage('Setup Tools') {
             steps {
                 sh 'which npm || (apt-get update -qq && apt-get install -y nodejs npm -qq)'
+                sh 'which docker || (apt-get update -qq && apt-get install -y docker.io -qq)'
                 sh 'test -f ~/docker-compose || curl -sL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-aarch64 -o ~/docker-compose && chmod +x ~/docker-compose; export PATH=$PATH:~; docker-compose --version || true'
             }
         }
