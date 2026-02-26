@@ -24,30 +24,50 @@ spring:
             - Path=/api/v1/auth/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: auth-service
+                fallbackUri: forward:/fallback/auth
         - id: customer-service
           uri: lb://customer-service
           predicates:
             - Path=/api/v1/customers/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: customer-service
+                fallbackUri: forward:/fallback/customer
         - id: account-service
           uri: lb://account-service
           predicates:
             - Path=/api/v1/accounts/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: account-service
+                fallbackUri: forward:/fallback/account
         - id: document-service
           uri: lb://document-service
           predicates:
             - Path=/api/v1/documents/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: document-service
+                fallbackUri: forward:/fallback/document
         - id: notification-service
           uri: lb://notification-service
           predicates:
             - Path=/api/v1/notifications/**
           filters:
             - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: notification-service
+                fallbackUri: forward:/fallback/notification
   main:
     web-application-type: reactive
 eureka:
@@ -67,3 +87,49 @@ management:
   endpoint:
     health:
       show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      auth-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      customer-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      account-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      document-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      notification-service:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  timelimiter:
+    instances:
+      auth-service:
+        timeoutDuration: 10s
+      customer-service:
+        timeoutDuration: 10s
+      account-service:
+        timeoutDuration: 10s
+      document-service:
+        timeoutDuration: 10s
+      notification-service:
+        timeoutDuration: 10s

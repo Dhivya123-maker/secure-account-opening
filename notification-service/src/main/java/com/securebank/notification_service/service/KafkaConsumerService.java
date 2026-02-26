@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,11 +17,19 @@ public class KafkaConsumerService {
 
     private final NotificationService notificationService;
 
+    private boolean isSystemAccount(String email) {
+        return email == null || email.endsWith("@securebank.com");
+    }
+
     @KafkaListener(topics = "user-registered",
             groupId = "notification-user-registered-v2",
             containerFactory = "userRegisteredKafkaListenerContainerFactory")
     public void handleUserRegistered(UserRegisteredEvent event) {
         log.info("Received user registered event for: {}", event.getEmail());
+        if (isSystemAccount(event.getEmail())) {
+            log.info("Skipping notification for system account: {}", event.getEmail());
+            return;
+        }
         try {
             Map<String, String> variables = new HashMap<>();
             variables.put("firstName", event.getUsername());
@@ -39,6 +46,10 @@ public class KafkaConsumerService {
             containerFactory = "accountOpenedKafkaListenerContainerFactory")
     public void handleAccountOpened(AccountOpenedEvent event) {
         log.info("Received account opened event for: {}", event.getEmail());
+        if (isSystemAccount(event.getEmail())) {
+            log.info("Skipping notification for system account: {}", event.getEmail());
+            return;
+        }
         try {
             Map<String, String> variables = new HashMap<>();
             variables.put("firstName", event.getFirstName());
@@ -56,6 +67,10 @@ public class KafkaConsumerService {
             containerFactory = "documentVerifiedKafkaListenerContainerFactory")
     public void handleDocumentVerified(DocumentVerifiedEvent event) {
         log.info("Received document verified event for: {}", event.getEmail());
+        if (isSystemAccount(event.getEmail())) {
+            log.info("Skipping notification for system account: {}", event.getEmail());
+            return;
+        }
         try {
             Map<String, String> variables = new HashMap<>();
             variables.put("firstName", event.getFirstName());
