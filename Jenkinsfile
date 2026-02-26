@@ -12,6 +12,12 @@ pipeline {
 
     stages {
 
+        stage('Setup Tools') {
+            steps {
+                sh 'which npm || (apt-get update -qq && apt-get install -y nodejs npm -qq)'
+                sh 'which docker-compose || (curl -sL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-aarch64 -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose)'
+            }
+        }
         stage('Checkout') {
             steps {
                 echo 'Checking out code...'
