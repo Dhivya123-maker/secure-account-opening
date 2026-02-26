@@ -15,7 +15,7 @@ pipeline {
         stage('Setup Tools') {
             steps {
                 sh 'which npm || (apt-get update -qq && apt-get install -y nodejs npm -qq)'
-                sh 'test -f /usr/local/bin/docker-compose || (curl -sL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-aarch64 -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose); docker-compose --version'
+                sh 'test -f ~/docker-compose || curl -sL https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-aarch64 -o ~/docker-compose && chmod +x ~/docker-compose; export PATH=$PATH:~; docker-compose --version || true'
             }
         }
         stage('Checkout') {
