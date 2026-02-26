@@ -96,7 +96,7 @@ pipeline {
             steps {
                 echo 'Deploying services...'
                 sh '''
-                    docker-compose down --remove-orphans
+                    docker ps -aq --filter name=securebank | xargs -r docker rm -f
                     docker-compose up -d
                 '''
             }
