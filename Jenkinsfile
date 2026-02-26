@@ -96,10 +96,8 @@ pipeline {
             steps {
                 echo 'Deploying services...'
                 sh '''
-                    SERVICES="config-server eureka-server api-gateway auth-service customer-service account-service document-service notification-service frontend zookeeper kafka oracle-db"
-                    docker-compose stop $SERVICES
-                    docker-compose rm -f $SERVICES
-                    docker-compose up -d $SERVICES
+                    docker-compose down --remove-orphans
+                    docker-compose up -d
                 '''
             }
         }
